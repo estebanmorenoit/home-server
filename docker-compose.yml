@@ -74,22 +74,6 @@ services:
       plugsy.link: http://$IPADDRESS:3000
       plugsy.category: Network
 ##
-##____________________ Castblock [PRIVACY/Chromecastblocker]
-  castblock:
-    container_name: castblock
-    image: erdnaxeli/castblock:latest
-    restart: always
-    network_mode: host
-    cap_add: 
-      - NET_ADMIN
-    environment:
-      DEBUG: true
-      OFFSET: 1
-      CATEGORIES: sponsor,interaction
-      MUTE_ADS: true
-    labels:
-      plugsy.name: CastBlock
-##
 ##
 ##________MEDIA________
 ##_____________________ Jellyfin [MEDIA/Library] 
@@ -110,7 +94,8 @@ services:
       UMASK_SET: 002 #optional
     volumes:
       - $DOCKERDIR/jellyfin/config:/config
-      - $DATAPOOL/media:/data
+      - $MEDIALIBRARY/tvseries:/tv
+      - $MEDIALIBRARY/movies:/movies
     ports:
       - 8096:8096
     labels:
@@ -138,8 +123,8 @@ services:
       - HOST_WHITELIST= #optional
     volumes:
       - $DOCKERDIR/Transmission/data:/config
-      - $DOCKERDIR/Transmission/downloads:/downloads
-      - $DOCKERDIR/Transmission/watch:/watch
+      - $MEDIALIBRARY/downloads/bitorrent:/downloads
+      - $MEDIALIBRARY/downloads/bitorrent/watch:/watch
     ports:
       - 9091:9091
       - 51413:51413
@@ -164,7 +149,6 @@ services:
       TZ: $TZ
     volumes:
       - $DOCKERDIR/prowlarr/config:/config
-      - $DATAPOOL/media/incoming:/Media/incoming
     ports:
       - 9696:9696
     labels:
@@ -186,7 +170,8 @@ services:
       TZ: $TZ
     volumes:
       - $DOCKERDIR/sonarr/config:/config
-      - $DATAPOOL/media:/Media
+      - $MEDIALIBRARY/tvseries:/tv
+      - $MEDIALIBRARY/downloads/bitorrent:/downloads
     ports:
       - 8989:8989
     labels:
@@ -208,7 +193,8 @@ services:
       TZ: $TZ
     volumes:
       - $DOCKERDIR/radarr/config:/config
-      - $DATAPOOL/media:/Media
+      - $MEDIALIBRARY/movies:/movies
+      - $MEDIALIBRARY/downloads/bitorrent:/downloads
     ports:
       - 7878:7878
     labels:
@@ -260,6 +246,28 @@ services:
       plugsy.link: http://$IPADDRESS:8686
       plugsy.category: Media
       org.hotio.pullio.update: true
+##
+##____________________ Plex
+  plex:
+    container_name: plex
+    image: lscr.io/linuxserver/plex:latest
+    network_mode: host
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - VERSION=docker
+      - PLEX_CLAIM=$PLEXCLAIM
+    volumes:
+      - $DOCKERDIR/plex/library:/config
+      - $MEDIALIBRARY/tvseries:/tv
+      - $MEDIALIBRARY/movies:/movies
+    labels:
+      plugsy.name: Plex
+      plugsy.link: http://$IPADDRESS:32400
+      plugsy.category: Media
+
 ##
 ##
 ##________MONITORING________
