@@ -1,0 +1,307 @@
+version: "2.4"
+services:
+##
+##
+##_______SYSTEM_____
+##____________________ Portainer [SYSTEM/Docker]
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    restart: always
+    networks:
+      - web-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $DOCKERDIR/portainer/data:/data
+    ports:
+      - 9000:9000
+    labels:
+      plugsy.name: Portainer
+      plugsy.link: http://$IPADDRESS:9000
+      plugsy.category: System
+##
+##____________________ Plugsy [SYSTEM/Homepage]
+  plugsy:
+    container_name: plugsy
+    image: plugsy/core
+    restart: always
+    networks: 
+      - web-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8000:3000
+##
+##_____________________ Caddy [SYSTEM/web-proxy]
+  caddy:
+    container_name: web-proxy
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: always
+    networks: 
+      - web-proxy
+    environment:
+      - CADDY_INGRESS_NETWORKS=web-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $DOCKERDIR/caddy/caddy_data:/data
+      - $DOCKERDIR/caddy/config:/config
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 443:443
+      - 80:80
+    labels:
+      caddy.email: $EMAIL
+      caddy_0: http://adguard.o
+      caddy_0.reverse_proxy: host.docker.internal:3000
+      caddy_1: http://vpn.o
+      caddy_1.reverse_proxy: host.docker.internal:5000
+      plugsy.name: Caddy web-proxy
+      plugsy.category: System
+##
+##
+##______PRIVACY_______
+##______________________ AdGuard Home [PRIVACY/Blocker]
+  adguard:
+    container_name: adguard
+    image: adguard/adguardhome
+    restart: always
+    network_mode: host
+    volumes:
+       - $DOCKERDIR/adguardhome/conf:/opt/adguardhome/conf
+    labels:
+      plugsy.name: AdGuard
+      plugsy.link: http://$IPADDRESS:3000
+      plugsy.category: Network
+##
+##____________________ Castblock [PRIVACY/Chromecastblocker]
+  castblock:
+    container_name: castblock
+    image: erdnaxeli/castblock:latest
+    restart: always
+    network_mode: host
+    cap_add: 
+      - NET_ADMIN
+    environment:
+      DEBUG: true
+      OFFSET: 1
+      CATEGORIES: sponsor,interaction
+      MUTE_ADS: true
+    labels:
+      plugsy.name: CastBlock
+##
+##
+##________MEDIA________
+##_____________________ Jellyfin [MEDIA/Library] 
+  jellyfin:
+    container_name: jellyfin
+    image: cr.hotio.dev/hotio/jellyfin
+    restart: always
+    networks: 
+      - web-proxy
+    # Required for Intel QuickSync/VAAPI hardware accelerated video encoding/transcoding
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+      UMASK_SET: 002 #optional
+    volumes:
+      - $DOCKERDIR/jellyfin/config:/config
+      - $DATAPOOL/media:/data
+    ports:
+      - 8096:8096
+    labels:
+      plugsy.name: Jellyfin
+      plugsy.link: http://$IPADDRESS:8096
+      plugsy.category: Media 
+      org.hotio.pullio.update: true
+##
+##____________________ Transmission [MEDIA/download-client]
+  qbittorrent:
+    container_name: transmission
+    image: lscr.io/linuxserver/transmission:latest
+    restart: always
+    networks:
+      - web-proxy
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - TRANSMISSION_WEB_HOME= #optional
+      - USER= #optional
+      - PASS= #optional
+      - WHITELIST= #optional
+      - PEERPORT= #optional
+      - HOST_WHITELIST= #optional
+    volumes:
+      - $DOCKERDIR/Transmission/data:/config
+      - $DOCKERDIR/Transmission/downloads:/downloads
+      - $DOCKERDIR/Transmission/watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    labels: 
+      org.hotio.pullio.update: true
+      plugsy.name: Transmission
+      plugsy.link: http://$IPADDRESS:9091
+      plugsy.category: Media
+##
+##____________________ Prowlarr [MEDIA/torrent-proxy for Sonarr&Radarr]
+  prowlarr:
+    container_name: prowlarr
+    image: cr.hotio.dev/hotio/prowlarr
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      UMASK: 002
+      TZ: $TZ
+    volumes:
+      - $DOCKERDIR/prowlarr/config:/config
+      - $DATAPOOL/media/incoming:/Media/incoming
+    ports:
+      - 9696:9696
+    labels:
+      plugsy.name: Prowlarr
+      plugsy.link: http://$IPADDRESS:9696
+      plugsy.category: Media
+      org.hotio.pullio.update: true
+##
+##____________________ Sonarr [MEDIA/PVR-TVshows]
+  sonarr:
+    container_name: sonarr
+    image: cr.hotio.dev/hotio/sonarr
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    volumes:
+      - $DOCKERDIR/sonarr/config:/config
+      - $DATAPOOL/media:/Media
+    ports:
+      - 8989:8989
+    labels:
+      plugsy.name: Sonarr (series)
+      plugsy.link: http://$IPADDRESS:8989
+      plugsy.category: Media
+      org.hotio.pullio.update: true
+##
+##____________________ Radarr [MEDIA/PVR-Movies]
+  radarr:
+    container_name: radarr
+    image: cr.hotio.dev/hotio/radarr
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    volumes:
+      - $DOCKERDIR/radarr/config:/config
+      - $DATAPOOL/media:/Media
+    ports:
+      - 7878:7878
+    labels:
+      plugsy.name: Radarr (movies)
+      plugsy.link: http://$IPADDRESS:7878
+      plugsy.category: Media 
+      org.hotio.pullio.update: true
+##
+##____________________ Bazarr [MEDIA/subtitles]
+  bazarr:
+    container_name: bazarr
+    image: cr.hotio.dev/hotio/bazarr
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    volumes:
+      - $DOCKERDIR/bazarr/config:/config
+      - $DATAPOOL/media:/Media
+    ports:
+      - 6767:6767
+    labels:
+      plugsy.name: Bazarr (subtitles)
+      plugsy.link: http://$IPADDRESS:6767
+      plugsy.category: Media
+      org.hotio.pullio.update: true
+##
+##____________________ Lidarr [MEDIA/PVR-Music]
+  lidarr:
+    container_name: lidarr
+    image: cr.hotio.dev/hotio/lidarr
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    volumes:
+      - $DOCKERDIR/lidarr/config:/config
+      - $DATAPOOL/media:/Media
+    ports:
+      - 8686:8686
+    labels:
+      plugsy.name: Lidarr (music)
+      plugsy.link: http://$IPADDRESS:8686
+      plugsy.category: Media
+      org.hotio.pullio.update: true
+##
+##
+##________MONITORING________
+##_____________________ Prometheus
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    networks:
+      - web-proxy
+    restart: always
+    volumes:
+      - $DOCKERDIR/prometheus/config:/etc/prometheus
+      - $DOCKERDIR/prometheus/data:/prometheus
+    ports:
+      - "9090:9090"
+    labels:
+      plugsy.name: Prometheus
+      plugsy.link: http://$IPADDRESS:9090
+      plugsy.category: Monitoring
+##
+##_____________________ Grafana
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    networks:
+      - web-proxy
+    restart: always
+    volumes:
+      - $DOCKERDIR/grafana/data:/var/lib/grafana
+      - $DOCKERDIR/grafana/config:/etc/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    labels:
+      plugsy.name: Grafana
+      plugsy.link: http://$IPADDRESS:3001
+      plugsy.category: Monitoring
+##
+##
+##
+##_________NETWORKS_______
+networks:
+  web-proxy:
+    external: true
