@@ -1,4 +1,4 @@
-version: "2.4"
+version: "1.29"
 services:
 ##
 ##
@@ -31,33 +31,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8000:3000
-##
-##_____________________ Caddy [SYSTEM/web-proxy]
-  caddy:
-    container_name: web-proxy
-    image: lucaslorentz/caddy-docker-proxy:ci-alpine
-    restart: always
-    networks: 
-      - web-proxy
-    environment:
-      - CADDY_INGRESS_NETWORKS=web-proxy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - $DOCKERDIR/caddy/caddy_data:/data
-      - $DOCKERDIR/caddy/config:/config
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    ports:
-      - 443:443
-      - 80:80
-    labels:
-      caddy.email: $EMAIL
-      caddy_0: http://adguard.o
-      caddy_0.reverse_proxy: host.docker.internal:3000
-      caddy_1: http://vpn.o
-      caddy_1.reverse_proxy: host.docker.internal:5000
-      plugsy.name: Caddy web-proxy
-      plugsy.category: System
 ##
 ##
 ##______PRIVACY_______
@@ -105,7 +78,7 @@ services:
       org.hotio.pullio.update: true
 ##
 ##____________________ Transmission [MEDIA/download-client]
-  qbittorrent:
+  transmission:
     container_name: transmission
     image: lscr.io/linuxserver/transmission:latest
     restart: always
@@ -206,7 +179,7 @@ services:
 ##____________________ Bazarr [MEDIA/subtitles]
   bazarr:
     container_name: bazarr
-    image: cr.hotio.dev/hotio/bazarr
+    image: cr.hotio.dev/hotio/bazarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -216,7 +189,8 @@ services:
       TZ: $TZ
     volumes:
       - $DOCKERDIR/bazarr/config:/config
-      - $DATAPOOL/media:/Media
+      - $MEDIALIBRARY/movies:/movies
+      - $MEDIALIBRARY/tvseries:/tv
     ports:
       - 6767:6767
     labels:
@@ -307,6 +281,139 @@ services:
       plugsy.link: http://$IPADDRESS:3001
       plugsy.category: Monitoring
 ##
+##
+##________TOOLS________
+##_____________________ VS Code
+  code-server:
+    container_name: code-server
+    image: lscr.io/linuxserver/code-server:latest
+    networks:
+      - web-proxy
+    restart: always
+    volumes:
+      - $DOCKERDIR/code-server/config:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - PASSWORD=password #optional
+      - HASHED_PASSWORD= #optional
+      - SUDO_PASSWORD=password #optional
+      - SUDO_PASSWORD_HASH= #optional
+      - DEFAULT_WORKSPACE=/config/workspace #optional
+    ports:
+      - 8443:8443
+    labels:
+      plugsy.name: VS Code
+      plugsy.link: http://$IPADDRESS:8443
+      plugsy.category: Tools
+##
+##_____________________ Duplicati
+  duplicati:
+    container_name: duplicati
+    image: lscr.io/linuxserver/duplicati:latest
+    networks:
+      - web-proxy
+    restart: always
+    volumes:
+      - $DOCKERDIR/duplicati/config:/config
+      - $MEDIALIBRARY/backups:/backups
+      - /home/esteban/docker:/source
+    ports:
+      - 8200:8200
+    labels:
+      plugsy.name: Duplicati
+      plugsy.link: http://$IPADDRESS:8200
+      plugsy.category: Tools
+##
+##_____________________ Baby Buddy
+  babybuddy:
+    container_name: babybuddy
+    image: lscr.io/linuxserver/babybuddy:latest
+    networks:
+      - web-proxy
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $DOCKERDIR/babybuddy/config:/config
+    ports:
+      - 8030:8000
+    labels:
+      plugsy.name: Babybuddy
+      plugsy.link: http://$IPADDRESS:8030
+      plugsy.category: Tools
+##
+##_____________________ Ubooquity
+  ubooquity:
+    container_name: ubooquity
+    image: lscr.io/linuxserver/ubooquity:latest
+    networks:
+      - web-proxy
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - MAXMEM=
+    volumes:
+      - $DOCKERDIR/ubooquity/config:/config
+      - $MEDIALIBRARY/Books:/books
+      - $MEDIALIBRARY/Comics:/comics
+    ports:
+      - 2202:2202
+      - 2203:2203
+    labels:
+      plugsy.name: Ubooquity
+      plugsy.link: http://$IPADDRESS:2202/ubooquity
+      plugsy.category: Tools
+##
+##_____________________ EmulatorJS
+  emulatorjs:
+    container_name: emulatorjs
+    image: lscr.io/linuxserver/emulatorjs:latest
+    networks:
+      - web-proxy
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $DOCKERDIR/emulatorjs/config:/config
+      - $MEDIALIBRARY/emulatorjs:/data
+    ports:
+      - 3004:3000
+      - 84:80
+      - 4001:4001 #optional
+    labels:
+      plugsy.name: EmulatorJS
+      plugsy.link: http://$IPADDRESS:84
+      plugsy.category: Games
+##
+##_____________________ LibreOffice
+  libreoffice:
+    container_name: libreoffice
+    image: lscr.io/linuxserver/libreoffice:latest
+    networks:
+      - web-proxy
+    restart: always
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $DOCKERDIR/libreoffice/config:/config
+    ports:
+      - 3010:3000
+    labels:
+      plugsy.name: LibreOffice
+      plugsy.link: http://$IPADDRESS:3010
+      plugsy.category: Tools
 ##
 ##
 ##_________NETWORKS_______
