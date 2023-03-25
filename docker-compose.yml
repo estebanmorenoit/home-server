@@ -1,3 +1,4 @@
+## run 'docker compose -f "docker-compose.yml" up -d --build '
 version: "1.29"
 services:
 ##
@@ -125,7 +126,7 @@ services:
     ports:
       - 9696:9696
     labels:
-      plugsy.name: Prowlarr
+      plugsy.name: Prowlarr (Indexer)
       plugsy.link: http://$IPADDRESS:9696
       plugsy.category: Media
       org.hotio.pullio.update: true
@@ -241,7 +242,30 @@ services:
       plugsy.name: Plex
       plugsy.link: http://$IPADDRESS:32400
       plugsy.category: Media
-
+##
+##____________________ Readarr
+  readarr:
+    container_name: readarr
+    image: lscr.io/linuxserver/readarr:develop
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $DOCKERDIR/readarr/data:/config
+      - $MEDIALIBRARY/Books:/books #optional
+      - $MEDIALIBRARY/downloads/bitorrent:/downloads #optional
+    ports:
+      - 8787:8787
+    labels:
+      plugsy.name: Readarr (Books)
+      plugsy.link: http://$IPADDRESS:8787
+      plugsy.category: Media
+      org.hotio.pullio.update: true
+    
 ##
 ##
 ##________MONITORING________
@@ -383,7 +407,7 @@ services:
       - TZ=$TZ
     volumes:
       - $DOCKERDIR/emulatorjs/config:/config
-      - $MEDIALIBRARY/emulatorjs:/data
+      - $DOCKERDIR/emulatorjs/data:/data
     ports:
       - 3004:3000
       - 84:80
