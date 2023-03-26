@@ -1,5 +1,10 @@
-## run 'docker compose -f "docker-compose.yml" up -d --build '
-version: "1.29"
+##
+##
+##_______COMMANDS_____
+## docker-compose pull
+## docker compose -f "docker-compose.yml" up -d --build --remove-orphans
+## docker system prune 
+version: "3.9"
 services:
 ##
 ##
@@ -24,7 +29,7 @@ services:
 ##____________________ Plugsy [SYSTEM/Homepage]
   plugsy:
     container_name: plugsy
-    image: plugsy/core
+    image: plugsy/core:latest
     restart: always
     networks: 
       - web-proxy
@@ -38,7 +43,7 @@ services:
 ##______________________ AdGuard Home [PRIVACY/Blocker]
   adguard:
     container_name: adguard
-    image: adguard/adguardhome
+    image: adguard/adguardhome:latest
     restart: always
     network_mode: host
     volumes:
@@ -53,7 +58,7 @@ services:
 ##_____________________ Jellyfin [MEDIA/Library] 
   jellyfin:
     container_name: jellyfin
-    image: cr.hotio.dev/hotio/jellyfin
+    image: cr.hotio.dev/hotio/jellyfin:latest
     restart: always
     networks: 
       - web-proxy
@@ -112,7 +117,7 @@ services:
 ##____________________ Prowlarr [MEDIA/torrent-proxy for Sonarr&Radarr]
   prowlarr:
     container_name: prowlarr
-    image: cr.hotio.dev/hotio/prowlarr
+    image: cr.hotio.dev/hotio/prowlarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -134,7 +139,7 @@ services:
 ##____________________ Sonarr [MEDIA/PVR-TVshows]
   sonarr:
     container_name: sonarr
-    image: cr.hotio.dev/hotio/sonarr
+    image: cr.hotio.dev/hotio/sonarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -157,7 +162,7 @@ services:
 ##____________________ Radarr [MEDIA/PVR-Movies]
   radarr:
     container_name: radarr
-    image: cr.hotio.dev/hotio/radarr
+    image: cr.hotio.dev/hotio/radarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -203,7 +208,7 @@ services:
 ##____________________ Lidarr [MEDIA/PVR-Music]
   lidarr:
     container_name: lidarr
-    image: cr.hotio.dev/hotio/lidarr
+    image: cr.hotio.dev/hotio/lidarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -265,7 +270,28 @@ services:
       plugsy.link: http://$IPADDRESS:8787
       plugsy.category: Media
       org.hotio.pullio.update: true
-    
+##
+##____________________ Ombi
+  ombi:
+    container_name: ombi
+    image: lscr.io/linuxserver/ombi:latest
+    networks: 
+      - web-proxy
+    restart: always
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - BASE_URL=/ombi #optional
+    volumes:
+      - $DOCKERDIR/ombi/config:/config
+    ports:
+      - 3579:3579
+    labels:
+      plugsy.name: Ombi (Plex Request)
+      plugsy.link: http://$IPADDRESS:3579
+      plugsy.category: Media
+      org.hotio.pullio.update: true
 ##
 ##
 ##________MONITORING________
@@ -417,27 +443,54 @@ services:
       plugsy.link: http://$IPADDRESS:84
       plugsy.category: Games
 ##
-##_____________________ LibreOffice
-  libreoffice:
-    container_name: libreoffice
-    image: lscr.io/linuxserver/libreoffice:latest
+##
+##________DEVOPS________
+##
+##_____________________ Jenkins
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    privileged: true
+    user: root
     networks:
       - web-proxy
     restart: always
-    security_opt:
-      - seccomp:unconfined #optional
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
     volumes:
-      - $DOCKERDIR/libreoffice/config:/config
+      - $DOCKERDIR/jenkins/config:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker
     ports:
-      - 3010:3000
+      - 8080:8080
+      - 50000:50000
     labels:
-      plugsy.name: LibreOffice
-      plugsy.link: http://$IPADDRESS:3010
-      plugsy.category: Tools
+      plugsy.name: Jenkins
+      plugsy.link: http://$IPADDRESS:8080
+      plugsy.category: DevOps
+##
+##_____________________ GitLab
+  gitlab:
+    container_name: gitlab
+    image: 'gitlab/gitlab-ee:latest'
+    networks:
+      - web-proxy
+    restart: always
+    hostname: 'gitlab.example.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.com:8929'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+    ports:
+      - 8929:8929
+      - 2224:22
+    volumes:
+      - $DOCKERDIR/gitlab/config:/etc/gitlab
+      - $DOCKERDIR/gitlab/logs:/var/log/gitlab
+      - $DOCKERDIR/gitlab/data:/var/opt/gitlab
+    shm_size: '256m'
+    labels:
+      plugsy.name: GitLab
+      plugsy.link: http://$IPADDRESS:8929
+      plugsy.category: DevOps
 ##
 ##
 ##_________NETWORKS_______
