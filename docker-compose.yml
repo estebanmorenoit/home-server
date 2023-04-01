@@ -443,6 +443,33 @@ services:
       plugsy.link: http://$IPADDRESS:84
       plugsy.category: Games
 ##
+##_____________________ Webtop (Linux in Browser)
+  webtop:
+    container_name: webtop
+    image: lscr.io/linuxserver/webtop:ubuntu-mate
+    networks:
+      - web-proxy
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - SUBFOLDER=/ #optional
+      - KEYBOARD=en-gb-qwerty #optional
+      - TITLE=Webtop #optional
+    volumes:
+      - $DOCKERDIR/webtop/config:/config
+      - /var/run/docker.sock:/var/run/docker.sock #optional
+    ports:
+      - 3005:3000
+    shm_size: "4gb" #optional
+    labels:
+      plugsy.name: Webtop
+      plugsy.link: http://$IPADDRESS:3005
+      plugsy.category: Linux
+##
 ##
 ##________DEVOPS________
 ##
