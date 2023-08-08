@@ -2,9 +2,14 @@
 ##
 ##_______COMMANDS_____
 ## docker-compose pull
-## docker compose -f "docker-compose.yml" up -d --build --remove-orphans
+## docker-compose -f "docker-compose.yml" up -d --build --remove-orphans
 ## docker system prune 
 version: "3.9"
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
 services:
 ##
 ##
@@ -41,18 +46,18 @@ services:
 ##
 ##______PRIVACY_______
 ##______________________ AdGuard Home [PRIVACY/Blocker]
-  adguard:
-    container_name: adguard
-    image: adguard/adguardhome:latest
-    restart: always
-    network_mode: host
-    volumes:
-       - $DOCKERDIR/adguardhome/conf:/opt/adguardhome/conf
-    labels:
-      plugsy.name: AdGuard
-      plugsy.link: http://$IPADDRESS:3000
-      plugsy.category: Network
-##
+#   adguard:
+#     container_name: adguard
+#     image: adguard/adguardhome:latest
+#     restart: always
+#     network_mode: host
+#     volumes:
+#        - $DOCKERDIR/adguardhome/conf:/opt/adguardhome/conf
+#     labels:
+#       plugsy.name: AdGuard
+#       plugsy.link: http://$IPADDRESS:3000
+#       plugsy.category: Network
+# ##
 ##
 ##________MEDIA________
 ##_____________________ Jellyfin [MEDIA/Library] 
@@ -63,9 +68,9 @@ services:
     networks: 
       - web-proxy
     # Required for Intel QuickSync/VAAPI hardware accelerated video encoding/transcoding
-    devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128
-      - /dev/dri/card0:/dev/dri/card0
+    # devices:
+    #   - /dev/dri/renderD128:/dev/dri/renderD128
+    #   - /dev/dri/card0:/dev/dri/card0
     environment:
       PUID: $PUID
       PGID: $PGID
@@ -297,16 +302,17 @@ services:
 ##________MONITORING________
 ##_____________________ Prometheus
   prometheus:
-    container_name: prometheus
     image: prom/prometheus:latest
+    container_name: prometheus
     networks:
       - web-proxy
-    restart: always
-    volumes:
-      - $DOCKERDIR/prometheus/config:/etc/prometheus
-      - $DOCKERDIR/prometheus/data:/prometheus
     ports:
-      - "9090:9090"
+      - 9090:9090
+    volumes:
+      - /etc/prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
     labels:
       plugsy.name: Prometheus
       plugsy.link: http://$IPADDRESS:9090
@@ -314,22 +320,34 @@ services:
 ##
 ##_____________________ Grafana
   grafana:
+    image: grafana/grafana-oss:latest
     container_name: grafana
-    image: grafana/grafana:latest
     networks:
       - web-proxy
-    restart: always
-    volumes:
-      - $DOCKERDIR/grafana/data:/var/lib/grafana
-      - $DOCKERDIR/grafana/config:/etc/grafana
     ports:
-      - "3001:3000"
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
     depends_on:
       - prometheus
     labels:
       plugsy.name: Grafana
-      plugsy.link: http://$IPADDRESS:3001
+      plugsy.link: http://$IPADDRESS:3000
       plugsy.category: Monitoring
+##
+##_____________________ Node Exporter
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
 ##
 ##
 ##________TOOLS________
@@ -377,71 +395,71 @@ services:
       plugsy.category: Tools
 ##
 ##_____________________ Baby Buddy
-  babybuddy:
-    container_name: babybuddy
-    image: lscr.io/linuxserver/babybuddy:latest
-    networks:
-      - web-proxy
-    restart: always
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $DOCKERDIR/babybuddy/config:/config
-    ports:
-      - 8030:8000
-    labels:
-      plugsy.name: Babybuddy
-      plugsy.link: http://$IPADDRESS:8030
-      plugsy.category: Tools
+  # babybuddy:
+  #   container_name: babybuddy
+  #   image: lscr.io/linuxserver/babybuddy:latest
+  #   networks:
+  #     - web-proxy
+  #   restart: always
+  #   environment:
+  #     - PUID=$PUID
+  #     - PGID=$PGID
+  #     - TZ=$TZ
+  #   volumes:
+  #     - $DOCKERDIR/babybuddy/config:/config
+  #   ports:
+  #     - 8030:8000
+  #   labels:
+  #     plugsy.name: Babybuddy
+  #     plugsy.link: http://$IPADDRESS:8030
+  #     plugsy.category: Tools
 ##
 ##_____________________ Ubooquity
-  ubooquity:
-    container_name: ubooquity
-    image: lscr.io/linuxserver/ubooquity:latest
-    networks:
-      - web-proxy
-    restart: always
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - MAXMEM=
-    volumes:
-      - $DOCKERDIR/ubooquity/config:/config
-      - $MEDIALIBRARY/Books:/books
-      - $MEDIALIBRARY/Comics:/comics
-    ports:
-      - 2202:2202
-      - 2203:2203
-    labels:
-      plugsy.name: Ubooquity
-      plugsy.link: http://$IPADDRESS:2202/ubooquity
-      plugsy.category: Tools
+  # ubooquity:
+  #   container_name: ubooquity
+  #   image: lscr.io/linuxserver/ubooquity:latest
+  #   networks:
+  #     - web-proxy
+  #   restart: always
+  #   environment:
+  #     - PUID=$PUID
+  #     - PGID=$PGID
+  #     - TZ=$TZ
+  #     - MAXMEM=
+  #   volumes:
+  #     - $DOCKERDIR/ubooquity/config:/config
+  #     - $MEDIALIBRARY/Books:/books
+  #     - $MEDIALIBRARY/Comics:/comics
+  #   ports:
+  #     - 2202:2202
+  #     - 2203:2203
+  #   labels:
+  #     plugsy.name: Ubooquity
+  #     plugsy.link: http://$IPADDRESS:2202/ubooquity
+  #     plugsy.category: Tools
 ##
 ##_____________________ EmulatorJS
-  emulatorjs:
-    container_name: emulatorjs
-    image: lscr.io/linuxserver/emulatorjs:latest
-    networks:
-      - web-proxy
-    restart: always
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-    volumes:
-      - $DOCKERDIR/emulatorjs/config:/config
-      - $DOCKERDIR/emulatorjs/data:/data
-    ports:
-      - 3004:3000
-      - 84:80
-      - 4001:4001 #optional
-    labels:
-      plugsy.name: EmulatorJS
-      plugsy.link: http://$IPADDRESS:84
-      plugsy.category: Games
+#   emulatorjs:
+#     container_name: emulatorjs
+#     image: lscr.io/linuxserver/emulatorjs:latest
+#     networks:
+#       - web-proxy
+#     restart: always
+#     environment:
+#       - PUID=$PUID
+#       - PGID=$PGID
+#       - TZ=$TZ
+#     volumes:
+#       - $DOCKERDIR/emulatorjs/config:/config
+#       - $DOCKERDIR/emulatorjs/data:/data
+#     ports:
+#       - 3004:3000
+#       - 84:80
+#       - 4001:4001 #optional
+#     labels:
+#       plugsy.name: EmulatorJS
+#       plugsy.link: http://$IPADDRESS:84
+#       plugsy.category: Games
 ##
 ##_____________________ Webtop (Linux in Browser)
   webtop:
