@@ -349,7 +349,24 @@ services:
     volumes:
       - '/:/host:ro,rslave'
 ##
-##
+##_____________________ cadvisor
+  cadvisor:
+     image: gcr.io/cadvisor/cadvisor:v0.47.0
+     container_name: cadvisor
+     ports:
+       - 8080:8080
+     networks:
+       - web-proxy
+     volumes:
+       - /:/rootfs:ro
+       - /var/run:/var/run:ro
+       - /sys:/sys:ro
+       - /var/lib/docker/:/var/lib/docker:ro
+       - /dev/disk/:/dev/disk:ro
+     devices:
+       - /dev/kmsg
+     privileged: true
+     restart: unless-stopped
 ##________TOOLS________
 ##_____________________ VS Code
   code-server:
@@ -505,17 +522,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/local/bin/docker:/usr/local/bin/docker
     ports:
-      - 8080:8080
+      - 8081:8080
       - 50000:50000
     labels:
       plugsy.name: Jenkins
-      plugsy.link: http://$IPADDRESS:8080
+      plugsy.link: http://$IPADDRESS:8081
       plugsy.category: DevOps
 ##
 ##_____________________ GitLab
   gitlab:
     container_name: gitlab
-    image: 'gitlab/gitlab-ee:latest'
+    image: 'gitlab/gitlab-ce:latest'
     networks:
       - web-proxy
     restart: always
@@ -525,8 +542,8 @@ services:
         external_url 'http://gitlab.example.com:8929'
         gitlab_rails['gitlab_shell_ssh_port'] = 2224
     ports:
-      - 8929:8929
-      - 2224:22
+      - '8929:8929'
+      - '2224:22'
     volumes:
       - $DOCKERDIR/gitlab/config:/etc/gitlab
       - $DOCKERDIR/gitlab/logs:/var/log/gitlab
