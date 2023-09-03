@@ -411,6 +411,28 @@ services:
       plugsy.link: http://$IPADDRESS:8200
       plugsy.category: Tools
 ##
+##_____________________ HomeAssistant
+  homeassistant:
+    image: lscr.io/linuxserver/homeassistant:latest
+    container_name: homeassistant
+    networks:
+      - web-proxy
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $DOCKERDIR/homeassistant/config:/config
+    ports:
+      - 8123:8123 #optional
+ #   devices:
+ #     - /path/to/device:/path/to/device #optional
+    restart: always
+    labels:
+      plugsy.name: HomeAssistant
+      plugsy.link: http://$IPADDRESS:8123
+      plugsy.category: Tools
+##
 ##_____________________ Baby Buddy
   # babybuddy:
   #   container_name: babybuddy
@@ -477,6 +499,9 @@ services:
 #       plugsy.name: EmulatorJS
 #       plugsy.link: http://$IPADDRESS:84
 #       plugsy.category: Games
+##
+##
+##________LINUX________
 ##
 ##_____________________ Webtop (Linux in Browser)
   webtop:
