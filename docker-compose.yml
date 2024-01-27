@@ -63,7 +63,7 @@ services:
 ##_____________________ Jellyfin [MEDIA/Library] 
   jellyfin:
     container_name: jellyfin
-    image: cr.hotio.dev/hotio/jellyfin:latest
+    image: ghcr.io/hotio/jellyfin:latest
     restart: always
     networks: 
       - web-proxy
