@@ -122,7 +122,7 @@ services:
 ##____________________ Prowlarr [MEDIA/torrent-proxy for Sonarr&Radarr]
   prowlarr:
     container_name: prowlarr
-    image: cr.hotio.dev/hotio/prowlarr:latest
+    image: ghcr.io/hotio/prowlarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -144,7 +144,7 @@ services:
 ##____________________ Sonarr [MEDIA/PVR-TVshows]
   sonarr:
     container_name: sonarr
-    image: cr.hotio.dev/hotio/sonarr:latest
+    image: ghcr.io/hotio/sonarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -167,7 +167,7 @@ services:
 ##____________________ Radarr [MEDIA/PVR-Movies]
   radarr:
     container_name: radarr
-    image: cr.hotio.dev/hotio/radarr:latest
+    image: ghcr.io/hotio/radarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -190,7 +190,7 @@ services:
 ##____________________ Bazarr [MEDIA/subtitles]
   bazarr:
     container_name: bazarr
-    image: cr.hotio.dev/hotio/bazarr:latest
+    image: ghcr.io/hotio/bazarr:latest
     networks: 
       - web-proxy
     restart: always
@@ -213,7 +213,7 @@ services:
 ##____________________ Lidarr [MEDIA/PVR-Music]
   lidarr:
     container_name: lidarr
-    image: cr.hotio.dev/hotio/lidarr:latest
+    image: ghcr.io/hotio/lidarr:latest
     networks: 
       - web-proxy
     restart: always
