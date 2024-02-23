@@ -298,6 +298,29 @@ services:
       plugsy.category: Media
       org.hotio.pullio.update: true
 ##
+##____________________ Kavita
+  kavita:
+    container_name: kavita
+    image: jvmilazz0/kavita:latest    # Using the stable branch from the offical repo.
+    networks: 
+        - web-proxy       
+    restart: unless-stopped
+    environment:
+        - PUID=$PUID
+        - PGID=$PGID
+        - TZ=$TZ
+    volumes:
+        - $MEDIALIBRARY/manga:/manga            # Manga is just an example you can have the name you want. See the following
+        - $MEDIALIBRARY/comics:/comics          # Use as many as you want
+        - $MEDIALIBRARY/books:/books            #
+        - $DOCKERDIR/kavita/config:/kvaita/config     # Change './data if you want to have the config files in a different place. /kavita/config must not be changed
+    ports:
+        - "5000:5000" # Change the public port (the first 5000) if you have conflicts with other servicesd
+    labels:
+      plugsy.name: Kavita (Comics)
+      plugsy.link: http://$IPADDRESS:5000
+      plugsy.category: Media
+      org.hotio.pullio.update: true
 ##
 ##________MONITORING________
 ##_____________________ Prometheus
