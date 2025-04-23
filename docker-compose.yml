@@ -10,6 +10,14 @@ volumes:
     driver: local
   grafana-data:
     driver: local
+  kube-config:
+    driver: local
+    ##
+##_________NETWORKS_______
+networks:
+  web-proxy:
+    external: true
+
 services:
 ##
 ##
@@ -313,7 +321,7 @@ services:
         - $MEDIALIBRARY/manga:/manga            # Manga is just an example you can have the name you want. See the following
         - $MEDIALIBRARY/comics:/comics          # Use as many as you want
         - $MEDIALIBRARY/books:/books            #
-        - $DOCKERDIR/kavita/config:/kvaita/config     # Change './data if you want to have the config files in a different place. /kavita/config must not be changed
+        - $DOCKERDIR/kavita/config:/kavita/config     # Change './data if you want to have the config files in a different place. /kavita/config must not be changed
     ports:
         - "5000:5000" # Change the public port (the first 5000) if you have conflicts with other servicesd
     labels:
@@ -356,7 +364,7 @@ services:
       - prometheus
     labels:
       plugsy.name: Grafana
-      plugsy.link: http://$IPADDRESS:3000
+      plugsy.link: http://$IPADDRESS:33000
       plugsy.category: Monitoring
 ##
 ##_____________________ Node Exporter
@@ -602,8 +610,219 @@ services:
   #     plugsy.link: http://$IPADDRESS:8929
   #     plugsy.category: DevOps
 ##
+##_________CK-X SIMULATOR STACK_________
 ##
-##_________NETWORKS_______
-networks:
-  web-proxy:
-    external: true
+
+  remote-desktop:
+    image: nishanb/ck-x-simulator-remote-desktop:latest
+    hostname: terminal
+    expose:
+      - "5901"
+      - "6901"
+    environment:
+      - VNC_PW=bakku-the-wizard
+      - VNC_PASSWORD=bakku-the-wizard
+      - VNC_VIEW_ONLY=false
+      - VNC_RESOLUTION=1280x800
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6901/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 1G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
+    networks:
+      - web-proxy
+
+  webapp:
+    image: nishanb/ck-x-simulator-webapp:latest
+    expose:
+      - "3000"
+    environment:
+      - VNC_SERVICE_HOST=remote-desktop
+      - VNC_SERVICE_PORT=6901
+      - VNC_PASSWORD=bakku-the-wizard
+      - SSH_HOST=remote-terminal
+      - SSH_PORT=22
+      - SSH_USER=candidate
+      - SSH_PASSWORD=password
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.2'
+    #       memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - web-proxy
+
+  nginx:
+    image: nishanb/ck-x-simulator-nginx:latest
+    depends_on:
+      - webapp
+      - remote-desktop
+      - remote-terminal
+      - facilitator
+      - k8s-api-server
+    ports:
+      - "30080:80"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.2'
+    #       memory: 256M
+    #     reservations:
+    #       cpus: '0.1'
+    #       memory: 128M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - web-proxy
+    labels:
+      plugsy.name: CK-X - Kubernetes Exam Simulator
+      plugsy.link: http://$IPADDRESS:30080
+      plugsy.category: Education
+
+  jumphost:
+    image: nishanb/ck-x-simulator-jumphost:latest
+    hostname: ckad9999
+    privileged: true
+    expose:
+      - "22"
+    volumes:
+      - kube-config:/home/candidate/.kube
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
+    networks:
+      - web-proxy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  remote-terminal:
+    image: nishanb/ck-x-simulator-remote-terminal:latest
+    hostname: remote-terminal
+    expose:
+      - "22"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.2'
+    #       memory: 256M
+    networks:
+      - web-proxy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  k8s-api-server:
+    image: nishanb/ck-x-simulator-cluster:latest
+    container_name: kind-cluster
+    hostname: k8s-api-server
+    privileged: true
+    expose:
+      - "6443"
+      - "22"
+    volumes:
+      - kube-config:/home/candidate/.kube
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 4G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 2G
+    networks:
+      - web-proxy
+    healthcheck:
+      test: ["CMD", "ls", "/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  redis:
+    image: redis:alpine
+    hostname: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    expose:
+      - "6379"
+    restart: unless-stopped
+    networks:
+      - web-proxy
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.3'
+    #       memory: 256M
+    #     reservations:
+    #       cpus: '0.1'
+    #       memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  facilitator:
+    image: nishanb/ck-x-simulator-facilitator:latest
+    hostname: facilitator
+    expose:
+      - "3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=prod
+      - SSH_HOST=jumphost
+      - SSH_PORT=22
+      - SSH_USERNAME=candidate
+      - LOG_LEVEL=info
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TRACK_METRICS=true
+    restart: unless-stopped
+    depends_on:
+      - jumphost
+      - redis
+    networks:
+      - web-proxy
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.2'
+    #       memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
