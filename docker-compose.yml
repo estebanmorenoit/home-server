@@ -364,7 +364,7 @@ services:
       - prometheus
     labels:
       plugsy.name: Grafana
-      plugsy.link: http://$IPADDRESS:33000
+      plugsy.link: http://$IPADDRESS:3000
       plugsy.category: Monitoring
 ##
 ##_____________________ Node Exporter
