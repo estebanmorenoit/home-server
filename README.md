@@ -72,14 +72,31 @@ This repository showcases my journey in setting up a comprehensive home server u
 <!-- SERVICES INCLUDED -->
 ## Services Included
 
-| Service       | Description                                             |
-|---------------|---------------------------------------------------------|
-| Traefik       | Reverse proxy and load balancer with SSL support       |
-| Portainer     | Docker container management UI                         |
-| Jellyfin      | Media server for streaming movies and TV shows         |
-| Grafana       | Analytics and monitoring dashboard                     |
-| Prometheus    | Monitoring system and time series database             |
-| Pi-hole       | Network-wide ad blocker                                |
+| Category   | Container Name  | Description                             |
+| ---------- | --------------- | --------------------------------------- |
+| System     | portainer       | Docker container management UI          |
+| System     | plugsy          | Homepage dashboard                      |
+| Media      | jellyfin        | Media server for movies and shows       |
+| Media      | transmission    | BitTorrent client                       |
+| Media      | prowlarr        | Torrent indexer proxy for Sonarr/Radarr |
+| Media      | sonarr          | TV show PVR                             |
+| Media      | radarr          | Movie PVR                               |
+| Media      | bazarr          | Subtitle downloader                     |
+| Media      | lidarr          | Music library manager                   |
+| Media      | plex            | Media server (Plex)                     |
+| Media      | readarr         | Book library manager                    |
+| Media      | ombi            | Media request manager for Plex          |
+| Media      | kavita          | Manga/comics/ebook server               |
+| Monitoring | prometheus      | Monitoring system and time series DB    |
+| Monitoring | grafana         | Analytics and visualization platform    |
+| Monitoring | node_exporter   | Host metrics exporter                   |
+| Monitoring | cadvisor        | Container metrics and monitoring        |
+| Tools      | code-server     | VS Code accessible from browser         |
+| Tools      | duplicati       | Backup software                         |
+| Tools      | homeassistant   | Home automation platform                |
+| Linux UI   | webtop          | Linux desktop in the browser            |
+| DevOps     | jenkins         | Jenkins CI/CD server                    |
+| Education  | remote-desktop  | CK-X Kubernetes simulator               |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -117,6 +134,9 @@ This repository showcases my journey in setting up a comprehensive home server u
 ## Roadmap
 
 - [x] Set up core services with Docker Compose
+- [x] Add full media stack (Jellyfin, Plex, Radarr, Sonarr, etc.)
+- [x] Implement monitoring tools (Grafana, Prometheus)
+- [x] Add DevOps and education tools
 - [ ] Implement automated backups
 - [ ] Add more self-hosted applications (e.g., Bitwarden, Home Assistant)
 
