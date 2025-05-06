@@ -2,23 +2,8 @@
 
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
 
 <!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -26,32 +11,24 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-
-
 <!-- PROJECT LOGO -->
-<!-- <br />
+<br />
 <div align="center">
-  <a href="https://github.com/estebanmorenoit/90DaysOfDevOps">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a> -->
-
   <h3 align="center">Home Server Using Docker Compose</h3>
 
   <p align="center">
-    This repository serves as a showcase for my journey working on the #90daysofdevops challenge, a dedicated initiative aimed at promoting continuous learning and skill development in the field of DevOps over a 90-day period.
+    A comprehensive, self-hosted home server setup leveraging Docker Compose to manage and deploy various services efficiently.
     <br />
-    <a href="https://blog.estebanmoreno.link/series/90-days-of-devops"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/estebanmorenoit/home-server"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://blog.estebanmoreno.link/series/90-days-of-devops">View Demo</a>
+    <a href="https://github.com/estebanmorenoit/home-server">View Demo</a>
     ·
-    <a href="https://github.com/estebanmorenoit/90DaysOfDevOps/issues">Report Bug</a>
+    <a href="https://github.com/estebanmorenoit/home-server/issues">Report Bug</a>
     ·
-    <a href="https://github.com/estebanmorenoit/90DaysOfDevOps/issues">Request Feature</a>
+    <a href="https://github.com/estebanmorenoit/home-server/issues">Request Feature</a>
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -63,6 +40,8 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
+    <li><a href="#services-included">Services Included</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -71,34 +50,82 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The "90DaysOfDevOps" challenge is a 90-day program aimed at helping individuals learn and practice DevOps principles, tools, and methodologies. Participants follow a daily roadmap covering various DevOps topics and tasks, accessing curated resources and engaging with the community. Through hands-on learning, they gain proficiency in DevOps tools, such as version control, CI/CD pipelines, automation, containers, and monitoring. By the end of the challenge, participants acquire a solid foundation in DevOps and are equipped to contribute effectively to software projects, enhancing their career prospects in the industry.
+This repository showcases my journey in setting up a comprehensive home server using Docker Compose. The goal is to host and manage multiple services efficiently, leveraging containerization for scalability and ease of maintenance.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 ### Built With
 
 * ![Linux][Linux]
-* ![Git][Git]
-* ![Python][Python]
 * ![Docker][Docker]
-* ![Jenkins][Jenkins]
-* ![Kubernetes][Kubernetes]
-* ![AWS][AWS]
-* ![Terraform][Terraform]
+* ![Docker Compose][Docker-Compose]
+* ![Portainer][Portainer]
+* ![Jellyfin][Jellyfin]
+* ![Grafana][Grafana]
+* ![Prometheus][Prometheus]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- SERVICES INCLUDED -->
+## Services Included
+
+| Service       | Description                                             |
+|---------------|---------------------------------------------------------|
+| Traefik       | Reverse proxy and load balancer with SSL support       |
+| Portainer     | Docker container management UI                         |
+| Jellyfin      | Media server for streaming movies and TV shows         |
+| Grafana       | Analytics and monitoring dashboard                     |
+| Prometheus    | Monitoring system and time series database             |
+| Pi-hole       | Network-wide ad blocker                                |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+### Prerequisites
+
+- A server running a Linux-based OS
+- Docker and Docker Compose installed
+- A domain name (optional, for Traefik and HTTPS)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/estebanmorenoit/home-server.git
+   cd home-server
+   ```
+
+2. Copy the example environment file and configure it:
+   ```bash
+   cp .env.example .env
+   nano .env
+   ```
+
+3. Start the services:
+   ```bash
+   docker-compose up -d
+   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Complete the challenge in 90 days
+- [x] Set up core services with Docker Compose
+- [ ] Implement automated backups
+- [ ] Add more self-hosted applications (e.g., Bitwarden, Home Assistant)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -109,62 +136,46 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
 <!-- CONTACT -->
 ## Contact
 
-Esteban Moreno - morenoramirezesteban@gmail.com
+Esteban Moreno - [morenoramirezesteban@gmail.com](mailto:morenoramirezesteban@gmail.com)
 
-Project Link: [https://github.com/estebanmorenoit/90DaysOfDevOps](https://github.com/estebanmorenoit/90DaysOfDevOps)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
+Project Link: [https://github.com/estebanmorenoit/home-server](https://github.com/estebanmorenoit/home-server)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
 
+- [Docker](https://www.docker.com/)
+- [Portainer](https://www.portainer.io/)
+- [Jellyfin](https://jellyfin.org/)
+- [Grafana](https://grafana.com/)
+- [Prometheus](https://prometheus.io/)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/estebanmorenoit/estebanmoreno-portfolio.svg?style=for-the-badge
-[contributors-url]: https://github.com/estebanmorenoit/90DaysOfDevOps/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/estebanmorenoit/estebanmoreno-portfolio.svg?style=for-the-badge
-[forks-url]: https://github.com/estebanmorenoit/90DaysOfDevOps/network/members
-[stars-shield]: https://img.shields.io/github/stars/estebanmorenoit/estebanmoreno-portfolio.svg?style=for-the-badge
-[stars-url]: https://github.com/estebanmorenoit/90DaysOfDevOps/stargazers
-[issues-shield]: https://img.shields.io/github/issues/estebanmorenoit/estebanmoreno-portfolio.svg?style=for-the-badge
-[issues-url]: https://github.com/estebanmorenoit/90DaysOfDevOps/issues
-[license-shield]: https://img.shields.io/github/license/estebanmorenoit/90daysofdevops.svg?style=for-the-badge
-[license-url]: https://github.com/estebanmorenoit/90DaysOfDevOps/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/estebanmorenoit/home-server.svg?style=for-the-badge
+[contributors-url]: https://github.com/estebanmorenoit/home-server/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/estebanmorenoit/home-server.svg?style=for-the-badge
+[forks-url]: https://github.com/estebanmorenoit/home-server/network/members
+[stars-shield]: https://img.shields.io/github/stars/estebanmorenoit/home-server.svg?style=for-the-badge
+[stars-url]: https://github.com/estebanmorenoit/home-server/stargazers
+[issues-shield]: https://img.shields.io/github/issues/estebanmorenoit/home-server.svg?style=for-the-badge
+[issues-url]: https://github.com/estebanmorenoit/home-server/issues
+[license-shield]: https://img.shields.io/github/license/estebanmorenoit/home-server.svg?style=for-the-badge
+[license-url]: https://github.com/estebanmorenoit/home-server/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/estebanmorenoramirez/
-[product-screenshot]: /images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
-[Terraform]: https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white
-[Terraform-url]: https://www.terraform.io/
-[CSS-3]: https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white
-[Python]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
-[Javascript]: https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E
-[GithubActions]: https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white
-[HTML]: https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white
-[AWS]: https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white
-[Jenkins]: https://img.shields.io/badge/jenkins-%232C5263.svg?style=for-the-badge&logo=jenkins&logoColor=white
-[Git]: https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white
+
 [Linux]: https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black
-[Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
-[Kubernetes]: https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white
+[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
+[Docker-Compose]: https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white
+[Traefik]: https://img.shields.io/badge/Traefik-24A1C1?style=for-the-badge&logo=traefikproxy&logoColor=white
+[Portainer]: https://img.shields.io/badge/Portainer-13BEF9?style=for-the-badge&logo=portainer&logoColor=white
+[Nextcloud]: https://img.shields.io/badge/Nextcloud-0082C9?style=for-the-badge&logo=nextcloud&logoColor=white
+[Jellyfin]: https://img.shields.io/badge/Jellyfin-00A4DC?style=for-the-badge&logo=jellyfin&logoColor=white
+[Grafana]: https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white
+[Prometheus]: https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white
